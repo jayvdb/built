@@ -77,7 +77,10 @@ pub fn write_dependencies(manifest_location: &path::Path, mut w: &fs::File) -> i
     use io::{Read, Write};
 
     let mut lock_buf = String::new();
-    fs::File::open(find_lockfile(manifest_location)?)?.read_to_string(&mut lock_buf)?;
+    let lockfile_path = find_lockfile(manifest_location)?;
+    // Tell cargo to re-run the build if the lock file is modified.
+    println!("cargo:rerun-if-changed={}", lockfile_path.display().to_string());
+    fs::File::open(lockfile_path)?.read_to_string(&mut lock_buf)?;
     let lockfile = lock_buf.parse().expect("Failed to parse lockfile");
 
     let dependencies = Dependencies::new(&lockfile);
